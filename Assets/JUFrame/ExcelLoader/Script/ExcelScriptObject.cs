@@ -4,7 +4,19 @@ using System;
 
 namespace JUFrame
 {
+    [Serializable]
+    public class ExcelColums
+    {
+        public string[] Cols;
+    }
 
+    [Serializable]
+    public class ExcelTable
+    {
+        public ExcelColums[] Rows;
+    }
+
+    [Serializable]
     public class ExcelScriptObject : ScriptableObject
     {
 
@@ -16,8 +28,8 @@ namespace JUFrame
 
         public int[] Rows;
         public int[] Cols;
-        public string[][,] ID;
-        public string[][,] Table;
+        public ExcelTable[] ID;
+        public ExcelTable[] Table;
     }
 
 }

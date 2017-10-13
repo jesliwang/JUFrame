@@ -5,7 +5,7 @@ using System.Collections;
 namespace JUFrame
 {
 
-    [CustomEditor(typeof(ExcelScriptObject))]
+    //[CustomEditor(typeof(ExcelScriptObject))]
     public class ExcelLoaderInspector : Editor
     {
         protected int index;
@@ -23,7 +23,8 @@ namespace JUFrame
         {
             if (GUILayout.Button("Open Excel"))
             {
-                Application.OpenURL(Application.dataPath + "/../" + Excel.excelPath);
+                EditorUtility.OpenWithDefaultApp(Application.dataPath + "/../" + Excel.excelPath);
+                //Application.OpenURL(Application.dataPath + "/../" + Excel.excelPath);
             }
             EditorGUILayout.LabelField("File Name", Excel.excelName);
 
@@ -35,7 +36,7 @@ namespace JUFrame
                 EditorGUILayout.BeginHorizontal();
                 for (int j = 0; j < Excel.Cols[index]; j++)
                 {
-                    EditorGUILayout.LabelField(Excel.Table[index][i, j]);
+                    EditorGUILayout.LabelField(Excel.Table[index].Rows[i].Cols[j]);
                 }
                 EditorGUILayout.EndHorizontal();
             }
