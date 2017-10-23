@@ -5,7 +5,7 @@ using System.Collections;
 namespace JUFrame
 {
 
-    //[CustomEditor(typeof(ExcelScriptObject))]
+    [CustomEditor(typeof(ExcelScriptObject))]
     public class ExcelLoaderInspector : Editor
     {
         protected int index;

@@ -17,3 +17,7 @@ Todo:
 学习到的知识：
 1. ScriptObject只能嵌套一层数组，否则会丢失。解决方法：分多个class，相互嵌套
 2. 分class后，直接数组声明会出问题。这里需要临时变量来生成下（List），再赋值会需要保存的数据中
+
+**注意事项**
+
+ SystemData.dll是从Editor\Data\Mono\lib\mono\2.0中取出来的。否则会出错

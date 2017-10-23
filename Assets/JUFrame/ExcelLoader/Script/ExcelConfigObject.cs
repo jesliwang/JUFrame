@@ -1,9 +1,15 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class ExcelConfigObject : ScriptableObject {
+namespace JUFrame
+{
+    public class ExcelConfigObject : ScriptableObject
+    {
 
-    public string ExcelPath;
+        public string ExcelPath;
 
-    public string ExportedObjectPath;
+        public string ExportedObjectPath;
+    }
 }
+
+
