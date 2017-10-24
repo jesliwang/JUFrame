@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a69c1608f4913436b9d7eeab7f9f8000, type: 3}
+  m_Name: AssetBundleManagerSettings
+  m_EditorClassIdentifier: 
+  m_settings: []
+  m_currentSetting: {fileID: 0}
+  m_devBuildSetting: {fileID: 0}
+  m_releaseBuildSetting: {fileID: 0}
+  m_streamingAssetSetting: {fileID: 0}
+  m_mode: 0
+  m_assetMap:
+    m_assets: []
+    m_manifestName: 
+  m_clearCacheOnPlay: 0
+  m_version: 1
