@@ -11,14 +11,116 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a69c1608f4913436b9d7eeab7f9f8000, type: 3}
   m_Name: AssetBundleManagerSettings
   m_EditorClassIdentifier: 
-  m_settings: []
-  m_currentSetting: {fileID: 0}
-  m_devBuildSetting: {fileID: 0}
-  m_releaseBuildSetting: {fileID: 0}
+  m_settings:
+  - {fileID: 114393860520514022}
+  - {fileID: 114109986365350940}
+  - {fileID: 114121171923777818}
+  m_currentSetting: {fileID: 114109986365350940}
+  m_devBuildSetting: {fileID: 114109986365350940}
+  m_releaseBuildSetting: {fileID: 114121171923777818}
   m_streamingAssetSetting: {fileID: 0}
-  m_mode: 0
+  m_mode: 2
   m_assetMap:
-    m_assets: []
-    m_manifestName: 
-  m_clearCacheOnPlay: 0
+    m_assets:
+    - path: Assets/AssetBundleSample/SampleAssets/MyCube.prefab
+      bundleName: cube-bundle
+      typeFullName: UnityEngine.GameObject
+    - path: Assets/AssetBundleSample/SampleAssets/MyMaterial.mat
+      bundleName: material-bundle
+      typeFullName: UnityEngine.Material
+    - path: Assets/AssetBundleSample/SampleAssets/TestScene.unity
+      bundleName: scene-bundle
+      typeFullName: UnityEditor.SceneAsset
+    - path: Assets/AssetBundleSample/SampleAssets/Variants/MyAssets-HD/myTexture.png
+      bundleName: variants/myassets.hd
+      typeFullName: UnityEngine.Texture2D
+    - path: Assets/AssetBundleSample/SampleAssets/Variants/MyAssets-HD/someMaterial.mat
+      bundleName: variants/myassets.hd
+      typeFullName: UnityEngine.Material
+    - path: Assets/AssetBundleSample/SampleAssets/Variants/MyAssets-HD/unityLogo.png
+      bundleName: variants/myassets.hd
+      typeFullName: UnityEngine.Texture2D
+    - path: Assets/AssetBundleSample/SampleAssets/Variants/MyAssets-SD/myTexture.png
+      bundleName: variants/myassets.sd
+      typeFullName: UnityEngine.Texture2D
+    - path: Assets/AssetBundleSample/SampleAssets/Variants/MyAssets-SD/someMaterial.mat
+      bundleName: variants/myassets.sd
+      typeFullName: UnityEngine.Material
+    - path: Assets/AssetBundleSample/SampleAssets/Variants/MyAssets-SD/unityLogo.png
+      bundleName: variants/myassets.sd
+      typeFullName: UnityEngine.Texture2D
+    - path: Assets/AssetBundleSample/SampleAssets/Variants/VariantScene.unity
+      bundleName: variants/variant-scene
+      typeFullName: UnityEditor.SceneAsset
+    - path: Assets/AssetBundleSample/SampleAssets/Tanks/Variants/Language/Danish/Canvas.prefab
+      bundleName: banner.danish
+      typeFullName: UnityEngine.GameObject
+    - path: Assets/AssetBundleSample/SampleAssets/Tanks/Variants/Language/English/Canvas.prefab
+      bundleName: banner.english
+      typeFullName: UnityEngine.GameObject
+    - path: Assets/AssetBundleSample/SampleAssets/Tanks/Scenes/TanksExample.unity
+      bundleName: tanks-scene-bundle
+      typeFullName: UnityEditor.SceneAsset
+    - path: Assets/AssetBundleSample/SampleAssets/Tanks/Variants/Skins/Desert-HD/TankAlbedo.png
+      bundleName: tanks-albedo.desert-hd
+      typeFullName: UnityEngine.Texture2D
+    - path: Assets/AssetBundleSample/SampleAssets/Tanks/Variants/Skins/Desert-SD/TankAlbedo.png
+      bundleName: tanks-albedo.desert-sd
+      typeFullName: UnityEngine.Texture2D
+    - path: Assets/AssetBundleSample/SampleAssets/Tanks/Variants/Skins/Normal-HD/TankAlbedo.png
+      bundleName: tanks-albedo.normal-hd
+      typeFullName: UnityEngine.Texture2D
+    - path: Assets/AssetBundleSample/SampleAssets/Tanks/Variants/Skins/Normal-SD/TankAlbedo.png
+      bundleName: tanks-albedo.normal-sd
+      typeFullName: UnityEngine.Texture2D
+    m_manifestName: GraphBundle
+  m_clearCacheOnPlay: 1
   m_version: 1
+--- !u!114 &114109986365350940
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb0d6761eedd644bb814b1710417863e, type: 3}
+  m_Name: Local Server(GraphBundle)
+  m_EditorClassIdentifier: 
+  m_serverURL: 
+  m_localAssetBundleDirectory: GraphBundle
+  m_manifestFileName: GraphBundle
+  m_serverType: 0
+  m_withPlatformSubDir: 0
+--- !u!114 &114121171923777818
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb0d6761eedd644bb814b1710417863e, type: 3}
+  m_Name: Remote Android
+  m_EditorClassIdentifier: 
+  m_serverURL: http://192.168.0.85:7888/
+  m_localAssetBundleDirectory: 
+  m_manifestFileName: GraphBundle
+  m_serverType: 1
+  m_withPlatformSubDir: 0
+--- !u!114 &114393860520514022
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb0d6761eedd644bb814b1710417863e, type: 3}
+  m_Name: Local Server(OSX, built-in)
+  m_EditorClassIdentifier: 
+  m_serverURL: 
+  m_localAssetBundleDirectory: AssetBundles/StandaloneOSXUniversal
+  m_manifestFileName: StandaloneOSXUniversal
+  m_serverType: 0
+  m_withPlatformSubDir: 0

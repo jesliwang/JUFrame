@@ -4,4 +4,7 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/AssetBundleSample/Scenes/TanksLoader.unity
+    guid: 5862ae6b6aa1d74418c15df67b425df7

@@ -5,6 +5,8 @@ using UnityEngine.AssetBundles.GraphTool;
 #endif
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
+using System.Threading;
 
 /*
  	In this demo, we demonstrate:
@@ -22,6 +24,56 @@ using System.Collections.Generic;
 
 namespace AssetBundles.Manager
 {
+    public class TestDecryFile : CustomYieldInstruction
+    {
+        protected List<byte> sourceData = new List<byte>();
+        protected List<byte> decryData = new List<byte>();
+
+        protected string Key;
+        protected System.Action<string, byte[]> process;
+
+        Thread thread;
+        protected volatile bool IsDone;
+
+        public override bool keepWaiting {
+            get
+            {
+                if (IsDone)
+                {
+                    Debug.LogError("key=" + Key + "," + decryData.Count);
+                    process(Key, decryData.ToArray());
+                }
+                return !IsDone;
+            }
+        }
+
+        public TestDecryFile(byte[] source, string key, System.Action<string, byte[]> target)
+        {
+            sourceData.Clear();
+            sourceData.AddRange(source);
+            process = target;
+            Key = key;
+
+            IsDone = false;
+            thread = new Thread(ParseText);
+            thread.Start();
+
+        }
+
+        protected void ParseText()
+        {
+            decryData.Clear();
+            for(int i = 0; i < sourceData.Count; i++)
+            {
+                decryData.Add((byte)(sourceData[i] ^ 77));
+            }
+            
+            IsDone = true;
+            thread.Abort();
+        }
+
+    }
+
     // Loaded assetBundle contains the references count which can be used to unload dependent assetBundles automatically.
     public class LoadedAssetBundle
     {
@@ -50,6 +102,8 @@ namespace AssetBundles.Manager
         static Dictionary<string, string> m_DownloadingErrors = new Dictionary<string, string>();
         static List<AssetBundleLoadOperation> m_InProgressOperations = new List<AssetBundleLoadOperation>();
         static Dictionary<string, string[]> m_Dependencies = new Dictionary<string, string[]>();
+
+        static Dictionary<string, AssetBundleCreateRequest> m_createAssetBundle = new Dictionary<string, AssetBundleCreateRequest>();
 
         public static LogMode logMode
         {
@@ -154,6 +208,7 @@ namespace AssetBundles.Manager
             var go = new GameObject("AssetBundleManager", typeof(AssetBundleManager));
             DontDestroyOnLoad(go);
 
+            AssetBundle.UnloadAllAssetBundles(true);
 #if UNITY_EDITOR
             // If we're in Editor simulation mode, we don't need the manifest assetBundle.
             if (SimulateAssetBundleInEditor)
@@ -290,12 +345,13 @@ namespace AssetBundles.Manager
 
             WWW download = null;
             string url = Settings.CurrentSetting.ServerURL + assetBundleName;
-
+            Debug.LogError("url=" + url);
             // For manifest assetbundle, always download it as we don't have hash for it.
             if (isLoadingAssetBundleManifest)
                 download = new WWW(url);
             else
-                download = WWW.LoadFromCacheOrDownload(url, m_AssetBundleManifest.GetAssetBundleHash(assetBundleName), 0);
+                download = new WWW(url);
+                //download = WWW.LoadFromCacheOrDownload(url, m_AssetBundleManifest.GetAssetBundleHash(assetBundleName), 0);
 
             m_DownloadingWWWs.Add(assetBundleName, download);
 
@@ -377,12 +433,23 @@ namespace AssetBundles.Manager
             }
         }
 
+        protected void AddAssetBundle(string key, byte[] asset)
+        {
+            var bundleCreate = AssetBundle.LoadFromMemoryAsync(asset);
+            if( null != bundleCreate)
+            {
+                m_createAssetBundle.Add(key, bundleCreate);
+            }
+
+        }
+
         void Update()
         {
             // Collect all the finished WWWs.
             var keysToRemove = new List<string>();
             foreach (var keyValue in m_DownloadingWWWs)
             {
+                
                 WWW download = keyValue.Value;
 
                 // If downloading fails.
@@ -396,7 +463,25 @@ namespace AssetBundles.Manager
                 // If downloading succeeds.
                 if (download.isDone)
                 {
-                    AssetBundle bundle = download.assetBundle;
+                    var my = new TestDecryFile(download.bytes, keyValue.Key, AddAssetBundle);
+                    StartCoroutine(my);
+                    keysToRemove.Add(keyValue.Key);
+                    continue;
+
+                    List<byte> assetBytes = new List<byte>();
+                    
+                    for (int index = 0; index < download.bytesDownloaded; index++)
+                    {
+                        assetBytes.Add( (byte)(download.bytes[index] ^ 77) );
+                    }
+
+                    //AssetBundle.LoadFromMemory(assetBytes.ToArray());
+                    var bundleCreate = AssetBundle.LoadFromMemoryAsync(assetBytes.ToArray());
+
+                    m_createAssetBundle.Add(keyValue.Key, bundleCreate);
+                    /*
+                    //AssetBundle bundle = AssetBundle.load(assetBytes);
+                    //AssetBundle bundle = download.assetBundle;
                     if (bundle == null)
                     {
                         m_DownloadingErrors.Add(keyValue.Key, string.Format("{0} is not a valid asset bundle.", keyValue.Key));
@@ -405,7 +490,10 @@ namespace AssetBundles.Manager
                     }
 
                     //Debug.Log("Downloading " + keyValue.Key + " is done at frame " + Time.frameCount);
-                    m_LoadedAssetBundles.Add(keyValue.Key, new LoadedAssetBundle(download.assetBundle));
+                    //m_LoadedAssetBundles.Add(keyValue.Key, new LoadedAssetBundle(download.assetBundle));
+                    m_LoadedAssetBundles.Add(keyValue.Key, new LoadedAssetBundle(bundle));
+                    keysToRemove.Add(keyValue.Key);
+                    */
                     keysToRemove.Add(keyValue.Key);
                 }
             }
@@ -416,6 +504,23 @@ namespace AssetBundles.Manager
                 WWW download = m_DownloadingWWWs[key];
                 m_DownloadingWWWs.Remove(key);
                 download.Dispose();
+            }
+
+            keysToRemove.Clear();
+            foreach (var keyValue in m_createAssetBundle)
+            {
+                AssetBundleCreateRequest assetCreate = keyValue.Value;
+                if (assetCreate.isDone)
+                {
+                    m_LoadedAssetBundles.Add(keyValue.Key, new LoadedAssetBundle(assetCreate.assetBundle));
+                    keysToRemove.Add(keyValue.Key);
+                }
+            }
+
+            foreach (var key in keysToRemove)
+            {
+                AssetBundleCreateRequest assetCreate = m_createAssetBundle[key];
+                m_createAssetBundle.Remove(key);
             }
 
             // Update all in progress operations
