@@ -293,7 +293,7 @@ namespace UnityEngine.AssetBundles.GraphTool
                 }
             }
 
-            BuildPlayerOptions opt;
+            BuildPlayerOptions opt = new BuildPlayerOptions();
             opt.options = (BuildOptions)m_buildOptions[target];
             opt.locationPathName = m_buildLocations[target] + "/" + m_playerName[target];
             opt.assetBundleManifestPath = manifestPath;

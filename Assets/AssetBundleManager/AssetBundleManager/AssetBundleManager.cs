@@ -56,6 +56,7 @@ namespace AssetBundles.Manager
 
             IsDone = false;
             thread = new Thread(ParseText);
+            thread.IsBackground = true;
             thread.Start();
 
         }
@@ -69,7 +70,6 @@ namespace AssetBundles.Manager
             }
             
             IsDone = true;
-            thread.Abort();
         }
 
     }
