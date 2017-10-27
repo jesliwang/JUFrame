@@ -15,13 +15,22 @@ namespace JUFrame
 
             if (File.Exists(filePath))
             {
+#if UNITY_2017_1_OR_NEWER
                 UnityEngine.Debug.unityLogger.logHandler = new LocalLogHandler();
+#else
+                UnityEngine.Debug.logger.logHandler = new LocalLogHandler();
+#endif
+
             }
             else
             {
                 if (!IsLogOpen)
                 {
+#if UNITY_2017_1_OR_NEWER
                     UnityEngine.Debug.unityLogger.logHandler = new NullLogHandler();
+#else
+                    UnityEngine.Debug.logger.logHandler = new NullLogHandler();
+#endif
                 }
             }
         }

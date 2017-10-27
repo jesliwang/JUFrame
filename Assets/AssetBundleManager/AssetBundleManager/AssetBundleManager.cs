@@ -208,7 +208,6 @@ namespace AssetBundles.Manager
             var go = new GameObject("AssetBundleManager", typeof(AssetBundleManager));
             DontDestroyOnLoad(go);
 
-            AssetBundle.UnloadAllAssetBundles(true);
 #if UNITY_EDITOR
             // If we're in Editor simulation mode, we don't need the manifest assetBundle.
             if (SimulateAssetBundleInEditor)

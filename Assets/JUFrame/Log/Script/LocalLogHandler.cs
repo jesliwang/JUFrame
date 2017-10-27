@@ -20,7 +20,11 @@ namespace JUFrame
             m_FileStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
             m_StreamWriter = new StreamWriter(m_FileStream);
 
+#if UNITY_2017_1_OR_NEWER
             m_DefaultLogHandler = Debug.unityLogger.logHandler;
+#else
+            m_DefaultLogHandler = Debug.logger.logHandler;
+#endif
         }
 
         ~LocalLogHandler()
