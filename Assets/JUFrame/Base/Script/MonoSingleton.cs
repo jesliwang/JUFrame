@@ -3,6 +3,7 @@ using System.Collections;
 
 namespace JUFrame
 {
+    [DisallowMultipleComponent]
     public abstract class MonoSingleton<T> : MonoBehaviour where T : MonoSingleton<T>
     {
 

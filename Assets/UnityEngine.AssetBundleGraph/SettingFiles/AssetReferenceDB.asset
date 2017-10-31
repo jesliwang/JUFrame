@@ -11,5 +11,173 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee4bc21567f434b598a3c96ba4946372, type: 3}
   m_Name: AssetReferenceDB
   m_EditorClassIdentifier: 
-  m_assets: []
+  m_assets:
+  - m_assetDatabaseId: 
+    m_importFrom: GraphBundle/variants/myassets.hd
+    m_exportTo: D:/myGitHub/JUFrame/eee/GraphBundle/variants/myassets.hd
+    m_variantName: 
+    m_assetTypeString: UnityEngine.AssetBundles.GraphTool.AssetBundleReference, Assembly-CSharp-Editor,
+      Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+  - m_assetDatabaseId: 
+    m_importFrom: GraphBundle/variants/myassets.hd.manifest
+    m_exportTo: D:/myGitHub/JUFrame/eee/GraphBundle/variants/myassets.hd.manifest
+    m_variantName: 
+    m_assetTypeString: UnityEngine.AssetBundles.GraphTool.AssetBundleReference, Assembly-CSharp-Editor,
+      Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+  - m_assetDatabaseId: 
+    m_importFrom: GraphBundle/variants/myassets.sd
+    m_exportTo: D:/myGitHub/JUFrame/eee/GraphBundle/variants/myassets.sd
+    m_variantName: 
+    m_assetTypeString: UnityEngine.AssetBundles.GraphTool.AssetBundleReference, Assembly-CSharp-Editor,
+      Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+  - m_assetDatabaseId: 
+    m_importFrom: GraphBundle/variants/myassets.sd.manifest
+    m_exportTo: D:/myGitHub/JUFrame/eee/GraphBundle/variants/myassets.sd.manifest
+    m_variantName: 
+    m_assetTypeString: UnityEngine.AssetBundles.GraphTool.AssetBundleReference, Assembly-CSharp-Editor,
+      Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+  - m_assetDatabaseId: 
+    m_importFrom: GraphBundle/variants/variant-scene
+    m_exportTo: D:/myGitHub/JUFrame/eee/GraphBundle/variants/variant-scene
+    m_variantName: 
+    m_assetTypeString: UnityEngine.AssetBundles.GraphTool.AssetBundleReference, Assembly-CSharp-Editor,
+      Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+  - m_assetDatabaseId: 
+    m_importFrom: GraphBundle/variants/variant-scene.manifest
+    m_exportTo: D:/myGitHub/JUFrame/eee/GraphBundle/variants/variant-scene.manifest
+    m_variantName: 
+    m_assetTypeString: UnityEngine.AssetBundles.GraphTool.AssetBundleReference, Assembly-CSharp-Editor,
+      Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+  - m_assetDatabaseId: 
+    m_importFrom: GraphBundle/banner.danish
+    m_exportTo: D:/myGitHub/JUFrame/eee/GraphBundle/banner.danish
+    m_variantName: 
+    m_assetTypeString: UnityEngine.AssetBundles.GraphTool.AssetBundleReference, Assembly-CSharp-Editor,
+      Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+  - m_assetDatabaseId: 
+    m_importFrom: GraphBundle/banner.danish.manifest
+    m_exportTo: D:/myGitHub/JUFrame/eee/GraphBundle/banner.danish.manifest
+    m_variantName: 
+    m_assetTypeString: UnityEngine.AssetBundles.GraphTool.AssetBundleReference, Assembly-CSharp-Editor,
+      Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+  - m_assetDatabaseId: 
+    m_importFrom: GraphBundle/banner.english
+    m_exportTo: D:/myGitHub/JUFrame/eee/GraphBundle/banner.english
+    m_variantName: 
+    m_assetTypeString: UnityEngine.AssetBundles.GraphTool.AssetBundleReference, Assembly-CSharp-Editor,
+      Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+  - m_assetDatabaseId: 
+    m_importFrom: GraphBundle/banner.english.manifest
+    m_exportTo: D:/myGitHub/JUFrame/eee/GraphBundle/banner.english.manifest
+    m_variantName: 
+    m_assetTypeString: UnityEngine.AssetBundles.GraphTool.AssetBundleReference, Assembly-CSharp-Editor,
+      Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+  - m_assetDatabaseId: 
+    m_importFrom: GraphBundle/cube-bundle
+    m_exportTo: D:/myGitHub/JUFrame/eee/GraphBundle/cube-bundle
+    m_variantName: 
+    m_assetTypeString: UnityEngine.AssetBundles.GraphTool.AssetBundleReference, Assembly-CSharp-Editor,
+      Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+  - m_assetDatabaseId: 
+    m_importFrom: GraphBundle/cube-bundle.manifest
+    m_exportTo: D:/myGitHub/JUFrame/eee/GraphBundle/cube-bundle.manifest
+    m_variantName: 
+    m_assetTypeString: UnityEngine.AssetBundles.GraphTool.AssetBundleReference, Assembly-CSharp-Editor,
+      Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+  - m_assetDatabaseId: 
+    m_importFrom: GraphBundle/GraphBundle
+    m_exportTo: D:/myGitHub/JUFrame/eee/GraphBundle/GraphBundle
+    m_variantName: 
+    m_assetTypeString: UnityEngine.AssetBundles.GraphTool.AssetBundleManifestReference,
+      Assembly-CSharp-Editor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+  - m_assetDatabaseId: 
+    m_importFrom: GraphBundle/GraphBundle.manifest
+    m_exportTo: D:/myGitHub/JUFrame/eee/GraphBundle/GraphBundle.manifest
+    m_variantName: 
+    m_assetTypeString: UnityEngine.AssetBundles.GraphTool.AssetBundleReference, Assembly-CSharp-Editor,
+      Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+  - m_assetDatabaseId: 
+    m_importFrom: GraphBundle/material-bundle
+    m_exportTo: D:/myGitHub/JUFrame/eee/GraphBundle/material-bundle
+    m_variantName: 
+    m_assetTypeString: UnityEngine.AssetBundles.GraphTool.AssetBundleReference, Assembly-CSharp-Editor,
+      Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+  - m_assetDatabaseId: 
+    m_importFrom: GraphBundle/material-bundle.manifest
+    m_exportTo: D:/myGitHub/JUFrame/eee/GraphBundle/material-bundle.manifest
+    m_variantName: 
+    m_assetTypeString: UnityEngine.AssetBundles.GraphTool.AssetBundleReference, Assembly-CSharp-Editor,
+      Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+  - m_assetDatabaseId: 
+    m_importFrom: GraphBundle/scene-bundle
+    m_exportTo: D:/myGitHub/JUFrame/eee/GraphBundle/scene-bundle
+    m_variantName: 
+    m_assetTypeString: UnityEngine.AssetBundles.GraphTool.AssetBundleReference, Assembly-CSharp-Editor,
+      Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+  - m_assetDatabaseId: 
+    m_importFrom: GraphBundle/scene-bundle.manifest
+    m_exportTo: D:/myGitHub/JUFrame/eee/GraphBundle/scene-bundle.manifest
+    m_variantName: 
+    m_assetTypeString: UnityEngine.AssetBundles.GraphTool.AssetBundleReference, Assembly-CSharp-Editor,
+      Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+  - m_assetDatabaseId: 
+    m_importFrom: GraphBundle/tanks-albedo.desert-hd
+    m_exportTo: D:/myGitHub/JUFrame/eee/GraphBundle/tanks-albedo.desert-hd
+    m_variantName: 
+    m_assetTypeString: UnityEngine.AssetBundles.GraphTool.AssetBundleReference, Assembly-CSharp-Editor,
+      Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+  - m_assetDatabaseId: 
+    m_importFrom: GraphBundle/tanks-albedo.desert-hd.manifest
+    m_exportTo: D:/myGitHub/JUFrame/eee/GraphBundle/tanks-albedo.desert-hd.manifest
+    m_variantName: 
+    m_assetTypeString: UnityEngine.AssetBundles.GraphTool.AssetBundleReference, Assembly-CSharp-Editor,
+      Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+  - m_assetDatabaseId: 
+    m_importFrom: GraphBundle/tanks-albedo.desert-sd
+    m_exportTo: D:/myGitHub/JUFrame/eee/GraphBundle/tanks-albedo.desert-sd
+    m_variantName: 
+    m_assetTypeString: UnityEngine.AssetBundles.GraphTool.AssetBundleReference, Assembly-CSharp-Editor,
+      Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+  - m_assetDatabaseId: 
+    m_importFrom: GraphBundle/tanks-albedo.desert-sd.manifest
+    m_exportTo: D:/myGitHub/JUFrame/eee/GraphBundle/tanks-albedo.desert-sd.manifest
+    m_variantName: 
+    m_assetTypeString: UnityEngine.AssetBundles.GraphTool.AssetBundleReference, Assembly-CSharp-Editor,
+      Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+  - m_assetDatabaseId: 
+    m_importFrom: GraphBundle/tanks-albedo.normal-hd
+    m_exportTo: D:/myGitHub/JUFrame/eee/GraphBundle/tanks-albedo.normal-hd
+    m_variantName: 
+    m_assetTypeString: UnityEngine.AssetBundles.GraphTool.AssetBundleReference, Assembly-CSharp-Editor,
+      Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+  - m_assetDatabaseId: 
+    m_importFrom: GraphBundle/tanks-albedo.normal-hd.manifest
+    m_exportTo: D:/myGitHub/JUFrame/eee/GraphBundle/tanks-albedo.normal-hd.manifest
+    m_variantName: 
+    m_assetTypeString: UnityEngine.AssetBundles.GraphTool.AssetBundleReference, Assembly-CSharp-Editor,
+      Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+  - m_assetDatabaseId: 
+    m_importFrom: GraphBundle/tanks-albedo.normal-sd
+    m_exportTo: D:/myGitHub/JUFrame/eee/GraphBundle/tanks-albedo.normal-sd
+    m_variantName: 
+    m_assetTypeString: UnityEngine.AssetBundles.GraphTool.AssetBundleReference, Assembly-CSharp-Editor,
+      Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+  - m_assetDatabaseId: 
+    m_importFrom: GraphBundle/tanks-albedo.normal-sd.manifest
+    m_exportTo: D:/myGitHub/JUFrame/eee/GraphBundle/tanks-albedo.normal-sd.manifest
+    m_variantName: 
+    m_assetTypeString: UnityEngine.AssetBundles.GraphTool.AssetBundleReference, Assembly-CSharp-Editor,
+      Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+  - m_assetDatabaseId: 
+    m_importFrom: GraphBundle/tanks-scene-bundle
+    m_exportTo: D:/myGitHub/JUFrame/eee/GraphBundle/tanks-scene-bundle
+    m_variantName: 
+    m_assetTypeString: UnityEngine.AssetBundles.GraphTool.AssetBundleReference, Assembly-CSharp-Editor,
+      Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+  - m_assetDatabaseId: 
+    m_importFrom: GraphBundle/tanks-scene-bundle.manifest
+    m_exportTo: D:/myGitHub/JUFrame/eee/GraphBundle/tanks-scene-bundle.manifest
+    m_variantName: 
+    m_assetTypeString: UnityEngine.AssetBundles.GraphTool.AssetBundleReference, Assembly-CSharp-Editor,
+      Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
   m_version: 2

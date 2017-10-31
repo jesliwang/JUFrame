@@ -95,7 +95,7 @@ namespace JUFrame
         public bool Connected { get { return clientSocket != null && clientSocket.Connected; } }
 
         //服务器主动发出数据受理委托及事件  
-        public delegate void OnServerDataReceived(byte[] receiveBuff);
+        public delegate void OnServerDataReceived(CommonPackHead packHead, byte[] receiveBuff);
         public event OnServerDataReceived ServerDataHandler;
 
         //服务器主动关闭连接委托及事件  
@@ -103,7 +103,8 @@ namespace JUFrame
         public event OnServerStop ServerStopEvent;
 
 
-        protected KCP kcpManager;
+        protected Dictionary<uint, KCP> kcpManager = new Dictionary<uint, KCP>();
+        protected uint usingConv;
 
         // Create an uninitialized client instance.  
         // To start the send/receive processing call the  
@@ -126,6 +127,7 @@ namespace JUFrame
             SocketAsyncEventArgs connectArgs = new SocketAsyncEventArgs();
             connectArgs.UserToken = clientSocket;
             connectArgs.RemoteEndPoint = hostEndPoint;
+            connectArgs.AcceptSocket = clientSocket;
             connectArgs.Completed += new EventHandler<SocketAsyncEventArgs>(OnConnect);
 
             clientSocket.ConnectAsync(connectArgs);
@@ -149,7 +151,8 @@ namespace JUFrame
                     sendArgs.IsUsing = true;
                     sendArgs.SetBuffer(data, 0, len);
                 }
-                clientSocket.SendAsync(sendArgs);
+
+                clientSocket.SendAsync(sendArgs); 
             }
             else
             {
@@ -170,12 +173,14 @@ namespace JUFrame
         {
             // Signals the end of connection.  
             autoConnectEvent.Set(); //释放阻塞.  
-
-            lock(kcpManager)
+            lock (kcpManager)
             {
-                kcpManager = new KCP(1024, SendData);
+                if (!kcpManager.ContainsKey(1))
+                {
+                    kcpManager.Add(1, new KCP(1, SendData));
+                }
+                usingConv = 1;
             }
-            
             kcpUpdateThread = new Thread(UpdateKcp);
             kcpUpdateThread.IsBackground = true;
             kcpUpdateThread.Start();
@@ -184,8 +189,12 @@ namespace JUFrame
             connected = (e.SocketError == SocketError.Success);
             //如果连接成功,则初始化socketAsyncEventArgs  
             if (connected)
+            {
                 initArgs(e);
-            
+                string str = "connect_req";
+                Send(Encoding.ASCII.GetBytes(str.ToCharArray()));
+            }
+
         }
 
         protected long GetCurrent()
@@ -206,57 +215,85 @@ namespace JUFrame
                 long start = GetCurrent();
                 lock (kcpManager)
                 {
-                    kcpManager.Update((uint)start);
+                    foreach (KeyValuePair<uint, KCP> kv in kcpManager)
+                    {
+                        kv.Value.Update((uint)start);
 
-                    
-                    int len = kcpManager.Recv(kcpDataCache);
-                    byte[] data = new byte[len];
-                    Array.Copy(kcpDataCache, data, len);
-                    m_buffer.AddRange(data);
+                        int len = kv.Value.Recv(kcpDataCache);
 
-                    //DoReceiveEvent()
+                        if (len > 0)
+                        {
 
-                   do
-                   {
+                            byte[] data = new byte[len];
+                            Array.Copy(kcpDataCache, data, len);
+                            m_buffer.AddRange(data);
 
-                       int headLength = Marshal.SizeOf(typeof(CommonPackHead));
-                       // 判断包头是否满足
-                       if ( headLength <= m_buffer.Count )
-                       {
-                           byte[] lenBytes = m_buffer.GetRange(0, headLength).ToArray();
-                           //分配结构体内存空间
-                           IntPtr structPtr = Marshal.AllocHGlobal(headLength);
-                           //将byte数组拷贝到分配好的内存空间
-                           Marshal.Copy(lenBytes, 0, structPtr, headLength);
-                           //将内存空间转换为目标结构体
-                           CommonPackHead packHead = (CommonPackHead) Marshal.PtrToStructure(structPtr, typeof(CommonPackHead));
-                           //释放内存空间
-                           Marshal.FreeHGlobal(structPtr);
+                            //DoReceiveEvent()
+                            do
+                            {
 
-                           if ( packHead.msg_len <= m_buffer.Count - headLength)
-                           {
-                               //包够长时,则提取出来,交给后面的程序去处理  
-                               byte[] recv = m_buffer.GetRange(0, headLength + (int)packHead.msg_len).ToArray();
-                               
-                               lock (m_buffer)
-                               {
-                                   m_buffer.RemoveRange(0, headLength + (int)packHead.msg_len);
-                               }
-                               //将数据包交给前台去处理  
-                               DoReceiveEvent(recv);
-                           }
-                           else
-                           {
-                               break;
-                           }
-                       }
-                       else
-                       {
-                           //长度不够,还得继续接收,需要跳出循环  
-                           break;
-                       }
+                                int headLength = Marshal.SizeOf(typeof(CommonPackHead));
+                                // 判断包头是否满足
+                                if (headLength <= m_buffer.Count)
+                                {
+                                    byte[] lenBytes = m_buffer.GetRange(0, headLength).ToArray();
+                                    //分配结构体内存空间
+                                    IntPtr structPtr = Marshal.AllocHGlobal(headLength);
+                                    //将byte数组拷贝到分配好的内存空间
+                                    Marshal.Copy(lenBytes, 0, structPtr, headLength);
+                                    //将内存空间转换为目标结构体
+                                    CommonPackHead packHead = (CommonPackHead)Marshal.PtrToStructure(structPtr, typeof(CommonPackHead));
+                                    //释放内存空间
+                                    Marshal.FreeHGlobal(structPtr);
 
-                   } while (m_buffer.Count > 4);
+                                    if (packHead.msg_len <= m_buffer.Count - headLength)
+                                    {
+                                        //包够长时,则提取出来,交给后面的程序去处理  
+                                        byte[] recv = m_buffer.GetRange(0, headLength + (int)packHead.msg_len).ToArray();
+
+                                        lock (m_buffer)
+                                        {
+                                            m_buffer.RemoveRange(0, headLength + (int)packHead.msg_len);
+                                        }
+                                        //将数据包交给前台去处理  
+                                        DoReceiveEvent(packHead, recv);
+                                    }
+                                    else
+                                    {
+                                        break;
+                                    }
+                                }
+                                else
+                                {
+                                
+                                    // 
+                                    if( 4 == len)
+                                    {
+                                        uint new_conv = 0;
+                                        KCP.ikcp_decode32u(data, 0, ref new_conv);
+                                        
+                                        if(!kcpManager.ContainsKey(new_conv))
+                                        {
+                                            kcpManager.Add(new_conv, new KCP(new_conv, SendData));
+                                            Log.Error("new_conv=" + new_conv);
+                                            lock (m_buffer)
+                                            {
+                                                m_buffer.RemoveRange(0, 4);
+                                            }
+                                        }
+
+                                        usingConv = new_conv;
+
+                                    }
+
+                                    //长度不够,还得继续接收,需要跳出循环  
+                                    break;
+                                }
+
+                            } while (m_buffer.Count > 4);
+                        }
+
+                    }
 
                 }
                 long after = GetCurrent();
@@ -278,19 +315,19 @@ namespace JUFrame
         /// <param name="e"></param>  
         private void initArgs(SocketAsyncEventArgs e)
         {
-            m_bufferManager.InitBuffer();
+            m_bufferManager.InitBuffer(); 
             //发送参数  
-            initSendArgs();
+            initSendArgs(); 
             //接收参数  
-            receiveEventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(IO_Completed);
-            receiveEventArgs.UserToken = e.UserToken;
-            receiveEventArgs.ArgsTag = 0;
-            m_bufferManager.SetBuffer(receiveEventArgs);
+            receiveEventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(IO_Completed); 
+            receiveEventArgs.UserToken = e.UserToken; 
+            receiveEventArgs.ArgsTag = 0; 
+            m_bufferManager.SetBuffer(receiveEventArgs); 
 
             //启动接收,不管有没有,一定得启动.否则有数据来了也不知道.  
             if (!e.AcceptSocket.ReceiveAsync(receiveEventArgs))
-            //if (!e.ConnectSocket.ReceiveAsync(receiveEventArgs))
                 ProcessReceive(receiveEventArgs);
+
         }
 
         /// <summary>  
@@ -343,102 +380,27 @@ namespace JUFrame
             {
                 // check if the remote host closed the connection  
                 Socket token = (Socket)e.UserToken;
+                Log.Error("esdf=" + e.BytesTransferred + "," + e.SocketError);
                 if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
                 {
                     //读取数据  
                     byte[] data = new byte[e.BytesTransferred];
                     Array.Copy(e.Buffer, e.Offset, data, 0, e.BytesTransferred);
-                    lock(kcpManager)
+
+                    if (!(e.BytesTransferred < KCP.IKCP_OVERHEAD))
                     {
-                        kcpManager.Input(data);
-                    
-                        //m_buffer.AddRange(data);
+                        lock (kcpManager)
+                        {
+                            uint new_conv = 0;
+                            KCP.ikcp_decode32u(data, 0, ref new_conv);
+
+                            if (kcpManager.ContainsKey(new_conv))
+                            {
+                                kcpManager[new_conv].Input(data);
+                            }
+
+                        }
                     }
-                    /*****
-                    do
-                    {
-
-                        /***
-                        // option_ver:
-                        // 1：用于外网通信，option_len为0
-                        // 2：用于内网通信，option_len大于0，附加数据是pb的名字
-
-                        #pragma pack(push, 1)
-                        typedef struct
-                        {
-                            uint16_t msg_id; // 消息id
-                            uint32_t msg_len; // 消息长度
-                            uint64_t uid; // 发送该包的玩家
-                            uint8_t  option_ver; // 附加数据版本
-                            uint8_t  option_len; // 附加数据长度
-                        } CommonPackHead;
-                        #pragma pack(pop)
-
-                        length = 2+4+8+1+1
-                         *****
-
-                        int headLength = Marshal.SizeOf(typeof(CommonPackHead));
-                        // 判断包头是否满足
-                        if ( headLength <= m_buffer.Count )
-                        {
-                            byte[] lenBytes = m_buffer.GetRange(0, headLength).ToArray();
-                            //分配结构体内存空间
-                            IntPtr structPtr = Marshal.AllocHGlobal(headLength);
-                            //将byte数组拷贝到分配好的内存空间
-                            Marshal.Copy(lenBytes, 0, structPtr, headLength);
-                            //将内存空间转换为目标结构体
-                            CommonPackHead packHead = (CommonPackHead) Marshal.PtrToStructure(structPtr, typeof(CommonPackHead));
-                            //释放内存空间
-                            Marshal.FreeHGlobal(structPtr);
-
-
-                            if ( packHead.msg_len <= m_buffer.Count - headLength)
-                            {
-                                //包够长时,则提取出来,交给后面的程序去处理  
-                                byte[] recv = m_buffer.GetRange(0, headLength + (int)packHead.msg_len).ToArray();
-                                //从数据池中移除这组数据,为什么要lock,你懂的  
-                                lock (m_buffer)
-                                {
-                                    m_buffer.RemoveRange(0, headLength + (int)packHead.msg_len);
-                                }
-                                //将数据包交给前台去处理  
-                                DoReceiveEvent(recv);
-                            }
-                            else
-                            {
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            //长度不够,还得继续接收,需要跳出循环  
-                            break;
-                        }
-
-                        /*
-                        //注意: 这里是需要和服务器有协议的,我做了个简单的协议,就是一个完整的包是包长(4字节)+包数据,便于处理,当然你可以定义自己需要的;   
-                        //判断包的长度,前面4个字节.  
-                        byte[] lenBytes = m_buffer.GetRange(0, 4).ToArray();
-                        int packageLen = BitConverter.ToInt32(lenBytes, 0);
-                        if (packageLen <= m_buffer.Count - 4)
-                        {
-                            //包够长时,则提取出来,交给后面的程序去处理  
-                            byte[] rev = m_buffer.GetRange(4, packageLen).ToArray();
-                            //从数据池中移除这组数据,为什么要lock,你懂的  
-                            lock (m_buffer)
-                            {
-                                m_buffer.RemoveRange(0, packageLen + 4);
-                            }
-                            //将数据包交给前台去处理  
-                            DoReceiveEvent(rev);
-                        }
-                        else
-                        {   //长度不够,还得继续接收,需要跳出循环  
-                            break;
-                        }
-                        *
-                    } while (m_buffer.Count > 4);
-                    */
                    
                     if (!token.ReceiveAsync(e))
                         this.ProcessReceive(e);
@@ -475,6 +437,7 @@ namespace JUFrame
         // a SockeException according to the SocketError.  
         private void ProcessError(SocketAsyncEventArgs e)
         {
+             
             Socket s = (Socket)e.UserToken;
             if (s.Connected)
             {
@@ -506,13 +469,13 @@ namespace JUFrame
         }
 
         // Exchange a message with the host.  
-        internal void Send(byte[] sendBuffer)
+        internal int Send(byte[] sendBuffer)
         {
             if (connected)
             {
                 lock (kcpManager)
                 {
-                    kcpManager.Send(sendBuffer);
+                    return kcpManager[usingConv].Send(sendBuffer);
                 }
                     
             }
@@ -527,14 +490,14 @@ namespace JUFrame
         /// 使用新进程通知事件回调  
         /// </summary>  
         /// <param name="buff"></param>  
-        private void DoReceiveEvent(byte[] buff)
+        private void DoReceiveEvent(CommonPackHead packHead, byte[] buff)
         {
             if (ServerDataHandler == null) return;
             //ServerDataHandler(buff); //可直接调用.  
             //但我更喜欢用新的线程,这样不拖延接收新数据.  
             Thread thread = new Thread(new ParameterizedThreadStart((obj) =>
             {
-                ServerDataHandler((byte[])obj);
+                ServerDataHandler(packHead, (byte[])obj);
             }));
             thread.IsBackground = true;
             thread.Start(buff);

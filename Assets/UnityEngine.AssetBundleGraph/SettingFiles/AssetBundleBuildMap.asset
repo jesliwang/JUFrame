@@ -12,103 +12,19 @@ MonoBehaviour:
   m_Name: AssetBundleBuildMap
   m_EditorClassIdentifier: 
   m_assetBundles:
-  - m_assetBundleName: variants/myassets
-    m_assetBundleVariantName: hd
-    m_fullName: variants/myassets.hd
-    m_assets:
-    - original: Assets/AssetBundleSample/SampleAssets/Variants/MyAssets-HD/myTexture.png
-      lower: assets/assetbundlesample/sampleassets/variants/myassets-hd/mytexture.png
-    - original: Assets/AssetBundleSample/SampleAssets/Variants/MyAssets-HD/someMaterial.mat
-      lower: assets/assetbundlesample/sampleassets/variants/myassets-hd/somematerial.mat
-    - original: Assets/AssetBundleSample/SampleAssets/Variants/MyAssets-HD/unityLogo.png
-      lower: assets/assetbundlesample/sampleassets/variants/myassets-hd/unitylogo.png
-    m_registererId: 98f3d0d8-b384-4bd5-b5b2-ced20dc8d495
-  - m_assetBundleName: variants/myassets
-    m_assetBundleVariantName: sd
-    m_fullName: variants/myassets.sd
-    m_assets:
-    - original: Assets/AssetBundleSample/SampleAssets/Variants/MyAssets-SD/myTexture.png
-      lower: assets/assetbundlesample/sampleassets/variants/myassets-sd/mytexture.png
-    - original: Assets/AssetBundleSample/SampleAssets/Variants/MyAssets-SD/someMaterial.mat
-      lower: assets/assetbundlesample/sampleassets/variants/myassets-sd/somematerial.mat
-    - original: Assets/AssetBundleSample/SampleAssets/Variants/MyAssets-SD/unityLogo.png
-      lower: assets/assetbundlesample/sampleassets/variants/myassets-sd/unitylogo.png
-    m_registererId: 98f3d0d8-b384-4bd5-b5b2-ced20dc8d495
-  - m_assetBundleName: variants/variant-scene
-    m_assetBundleVariantName: 
-    m_fullName: variants/variant-scene
-    m_assets:
-    - original: Assets/AssetBundleSample/SampleAssets/Variants/VariantScene.unity
-      lower: assets/assetbundlesample/sampleassets/variants/variantscene.unity
-    m_registererId: 1c729d35-31e3-4711-a92b-8942c24315c1
-  - m_assetBundleName: banner
-    m_assetBundleVariantName: danish
-    m_fullName: banner.danish
-    m_assets:
-    - original: Assets/AssetBundleSample/SampleAssets/Tanks/Variants/Language/Danish/Canvas.prefab
-      lower: assets/assetbundlesample/sampleassets/tanks/variants/language/danish/canvas.prefab
-    m_registererId: d9235275-4f0d-4128-98ff-405f942fdb38
-  - m_assetBundleName: banner
-    m_assetBundleVariantName: english
-    m_fullName: banner.english
-    m_assets:
-    - original: Assets/AssetBundleSample/SampleAssets/Tanks/Variants/Language/English/Canvas.prefab
-      lower: assets/assetbundlesample/sampleassets/tanks/variants/language/english/canvas.prefab
-    m_registererId: d9235275-4f0d-4128-98ff-405f942fdb38
-  - m_assetBundleName: tanks-scene-bundle
-    m_assetBundleVariantName: 
-    m_fullName: tanks-scene-bundle
-    m_assets:
-    - original: Assets/AssetBundleSample/SampleAssets/Tanks/Scenes/TanksExample.unity
-      lower: assets/assetbundlesample/sampleassets/tanks/scenes/tanksexample.unity
-    m_registererId: 87e43f53-62eb-418e-a582-db61dcf58a6d
-  - m_assetBundleName: tanks-albedo
-    m_assetBundleVariantName: desert-hd
-    m_fullName: tanks-albedo.desert-hd
-    m_assets:
-    - original: Assets/AssetBundleSample/SampleAssets/Tanks/Variants/Skins/Desert-HD/TankAlbedo.png
-      lower: assets/assetbundlesample/sampleassets/tanks/variants/skins/desert-hd/tankalbedo.png
-    m_registererId: 242b4511-dc41-472a-8f45-17a992ea4930
-  - m_assetBundleName: tanks-albedo
-    m_assetBundleVariantName: desert-sd
-    m_fullName: tanks-albedo.desert-sd
-    m_assets:
-    - original: Assets/AssetBundleSample/SampleAssets/Tanks/Variants/Skins/Desert-SD/TankAlbedo.png
-      lower: assets/assetbundlesample/sampleassets/tanks/variants/skins/desert-sd/tankalbedo.png
-    m_registererId: 242b4511-dc41-472a-8f45-17a992ea4930
-  - m_assetBundleName: tanks-albedo
-    m_assetBundleVariantName: normal-hd
-    m_fullName: tanks-albedo.normal-hd
-    m_assets:
-    - original: Assets/AssetBundleSample/SampleAssets/Tanks/Variants/Skins/Normal-HD/TankAlbedo.png
-      lower: assets/assetbundlesample/sampleassets/tanks/variants/skins/normal-hd/tankalbedo.png
-    m_registererId: 242b4511-dc41-472a-8f45-17a992ea4930
-  - m_assetBundleName: tanks-albedo
-    m_assetBundleVariantName: normal-sd
-    m_fullName: tanks-albedo.normal-sd
-    m_assets:
-    - original: Assets/AssetBundleSample/SampleAssets/Tanks/Variants/Skins/Normal-SD/TankAlbedo.png
-      lower: assets/assetbundlesample/sampleassets/tanks/variants/skins/normal-sd/tankalbedo.png
-    m_registererId: 242b4511-dc41-472a-8f45-17a992ea4930
   - m_assetBundleName: cube-bundle
     m_assetBundleVariantName: 
     m_fullName: cube-bundle
-    m_assets:
-    - original: Assets/AssetBundleSample/SampleAssets/MyCube.prefab
-      lower: assets/assetbundlesample/sampleassets/mycube.prefab
+    m_assets: []
     m_registererId: da44182b-480b-4e4a-b3bf-6bbf7840bcf0
   - m_assetBundleName: material-bundle
     m_assetBundleVariantName: 
     m_fullName: material-bundle
-    m_assets:
-    - original: Assets/AssetBundleSample/SampleAssets/MyMaterial.mat
-      lower: assets/assetbundlesample/sampleassets/mymaterial.mat
+    m_assets: []
     m_registererId: 73d47017-031d-40d5-aa5c-7de976e870d2
   - m_assetBundleName: scene-bundle
     m_assetBundleVariantName: 
     m_fullName: scene-bundle
-    m_assets:
-    - original: Assets/AssetBundleSample/SampleAssets/TestScene.unity
-      lower: assets/assetbundlesample/sampleassets/testscene.unity
+    m_assets: []
     m_registererId: 94eeb99e-9c53-43a7-8147-b3971748b828
   m_version: 1
