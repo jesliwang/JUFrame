@@ -10,7 +10,7 @@ namespace JUFrame
     {
         public readonly static Dictionary<int, Type> ReceiveServiceMap = new Dictionary<int, Type>()
         {
-            
+            { 3001 , typeof(Battle.GetBattleDataResponse) }
         };
         /**
 

@@ -10,6 +10,85 @@ using System.Threading;
 
 namespace JUFrame
 {
+    public class ObjectPool<TObject>
+    {
+        private int maxPoolSize;
+        private Dictionary<Type, Stack<TObject>> poolCache;
+        private Func<TObject> factory;
+
+        public ObjectPool(int poolSize)
+        {
+            this.maxPoolSize = poolSize;
+            this.poolCache = new Dictionary<Type, Stack<TObject>>();
+        }
+
+        public ObjectPool(int poolSize, Func<TObject> factory) : this(poolSize)
+        {
+            this.factory = factory;
+        }
+
+        public T Rent<T>() where T : TObject
+        {
+            return (T)this.Rent(typeof(T));
+        }
+
+        public TObject Rent(Type type)
+        {
+            
+            Stack<TObject> cachedCollection;
+            lock (this.poolCache)
+            {
+                if (!this.poolCache.TryGetValue(type, out cachedCollection))
+                {
+                    cachedCollection = new Stack<TObject>();
+                    this.poolCache.Add(type, cachedCollection);
+                }
+            }
+
+            
+
+            if (cachedCollection.Count > 0)
+            {
+                TObject instance = cachedCollection.Pop();
+                if (instance != null)
+                    return instance;
+            }
+
+            // New instances don't need to be prepared for re-use, so we just return it.
+            if (this.factory == null)
+            {
+                return (TObject)Activator.CreateInstance(type);
+            }
+            else
+            {
+                return this.factory();
+            }
+        }
+
+        public void Return(TObject instanceObject)
+        {
+            Stack<TObject> cachedCollection = null;
+            Type type = typeof(TObject);
+
+            lock (this.poolCache)
+            {
+                if (!this.poolCache.TryGetValue(type, out cachedCollection))
+                {
+                    cachedCollection = new Stack<TObject>();
+                    this.poolCache.Add(type, cachedCollection);
+                }
+
+                if (cachedCollection.Count >= this.maxPoolSize)
+                {
+                    return;
+                }
+
+                cachedCollection.Push(instanceObject);
+            }
+            
+        }
+    }
+
     class MySocketEventArgs : SocketAsyncEventArgs
     {
 
@@ -22,6 +101,7 @@ namespace JUFrame
         /// 设置/获取使用状态  
         /// </summary>  
         public bool IsUsing { get; set; }
+
 
     }
 
@@ -55,10 +135,10 @@ namespace JUFrame
         private const Int32 BuffSize = 1024;
 
         // The socket used to send/receive messages.  
-        private Socket clientSocket;
+        protected Socket clientSocket;
 
         // Flag for connected socket.  
-        private bool connected
+        protected bool connected
         {
             get
             {
@@ -78,6 +158,8 @@ namespace JUFrame
         // Listener endpoint.  
         private IPEndPoint hostEndPoint;
 
+        private IPEndPoint localEndPoint;
+
         // Signals a connection.  
         private static AutoResetEvent autoConnectEvent = new AutoResetEvent(false);
 
@@ -86,13 +168,16 @@ namespace JUFrame
         List<byte> m_buffer;
         //发送与接收的MySocketEventArgs变量定义.  
         private List<MySocketEventArgs> listArgs = new List<MySocketEventArgs>();
-        private MySocketEventArgs receiveEventArgs = new MySocketEventArgs();
         int tagCount = 0;
 
+
+        private ObjectPool<MySocketEventArgs> receiveEventArgsPool;
         /// <summary>  
         /// 当前连接状态  
         /// </summary>  
-        public bool Connected { get { return clientSocket != null && clientSocket.Connected; } }
+        public bool Connected { get {
+                return clientSocket != null /*&& clientSocket.Connected*/ && usingConv > 1; } }
+
 
         //服务器主动发出数据受理委托及事件  
         public delegate void OnServerDataReceived(CommonPackHead packHead, byte[] receiveBuff);
@@ -104,7 +189,7 @@ namespace JUFrame
 
 
         protected Dictionary<uint, KCP> kcpManager = new Dictionary<uint, KCP>();
-        protected uint usingConv;
+        protected uint usingConv = 0;
 
         // Create an uninitialized client instance.  
         // To start the send/receive processing call the  
@@ -114,34 +199,62 @@ namespace JUFrame
             // Instantiates the endpoint and socket.  
             hostEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
             clientSocket = new Socket(hostEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
-            m_bufferManager = new BufferManager(BuffSize * 2, BuffSize);
+            Log.Error(" p= " + clientSocket.ReceiveTimeout );
+
+            localEndPoint = new IPEndPoint(IPAddress.Any, 23232);
+            clientSocket.Bind(localEndPoint);
+
+            m_bufferManager = new BufferManager(BuffSize * 30, BuffSize);
             m_buffer = new List<byte>();
+
+            m_bufferManager.InitBuffer();
+            receiveEventArgsPool = new ObjectPool<MySocketEventArgs>(10, this.ConfigureSocketEventArgs);
+        }
+        
+        private MySocketEventArgs ConfigureSocketEventArgs()
+        {
+            var eventArg = new MySocketEventArgs();
+            eventArg.Completed += new EventHandler<SocketAsyncEventArgs>(this.IO_Completed);
+            m_bufferManager.SetBuffer(eventArg);
+            eventArg.RemoteEndPoint = localEndPoint;
+            eventArg.ArgsTag = 0;
+
+            return eventArg;
         }
 
         /// <summary>  
         /// 连接到主机  
         /// </summary>  
         /// <returns>0.连接成功, 其他值失败,参考SocketError的值列表</returns>  
-        internal SocketError Connect()
+        internal virtual SocketError Connect()
         {
             SocketAsyncEventArgs connectArgs = new SocketAsyncEventArgs();
             connectArgs.UserToken = clientSocket;
             connectArgs.RemoteEndPoint = hostEndPoint;
             connectArgs.AcceptSocket = clientSocket;
             connectArgs.Completed += new EventHandler<SocketAsyncEventArgs>(OnConnect);
+            Log.Error("Csssssssss");
 
-            clientSocket.ConnectAsync(connectArgs);
-            autoConnectEvent.WaitOne(5000, false); //阻塞. 让程序在这里等待,直到连接响应后再返回连接结果  
+            OnConnect(connectArgs);
 
-            return connectArgs.SocketError;
+            //clientSocket.ConnectAsync(connectArgs);
+            //autoConnectEvent.WaitOne(5000, false); //阻塞. 让程序在这里等待,直到连接响应后再返回连接结果  
+            Log.Error("23424323424");
+            return SocketError.Success;
+            //return connectArgs.SocketError;
         }
 
-        protected void SendData(byte[] data, int len)
+        protected virtual void SendData(byte[] data, int len)
         {
             if (connected)
             {
+                uint new_conv = 0;
+                KCP.ikcp_decode32u(data, 0, ref new_conv);
+                Log.Error("send_cov=" + new_conv + ",time=" + GetCurrent());
+
                 //查找有没有空闲的发送MySocketEventArgs,有就直接拿来用,没有就创建新的.So easy!  
                 MySocketEventArgs sendArgs = listArgs.Find(a => a.IsUsing == false);
+
                 if (sendArgs == null)
                 {
                     sendArgs = initSendArgs();
@@ -152,7 +265,12 @@ namespace JUFrame
                     sendArgs.SetBuffer(data, 0, len);
                 }
 
-                clientSocket.SendAsync(sendArgs); 
+                if (!clientSocket.SendToAsync(sendArgs))
+                {
+                    sendArgs.IsUsing = false;
+                    ProcessSend(sendArgs);
+                }
+
             }
             else
             {
@@ -168,39 +286,92 @@ namespace JUFrame
 
         protected Thread kcpUpdateThread;
 
-        // Calback for connect operation  
-        private void OnConnect(object sender, SocketAsyncEventArgs e)
+        private void OnConnect(SocketAsyncEventArgs e)
         {
             // Signals the end of connection.  
-            autoConnectEvent.Set(); //释放阻塞.  
-            lock (kcpManager)
+            //autoConnectEvent.Set(); //释放阻塞.  
+            Log.Error("usingConv=sss" + usingConv);
+            if (usingConv <= 0)
             {
-                if (!kcpManager.ContainsKey(1))
+                lock (kcpManager)
                 {
-                    kcpManager.Add(1, new KCP(1, SendData));
+                    if (!kcpManager.ContainsKey(1))
+                    {
+                        kcpManager.Add(1, new KCP(1, SendData));
+                    }
+                    usingConv = 1;
                 }
-                usingConv = 1;
+                if (null == kcpUpdateThread)
+                {
+                    kcpUpdateThread = new Thread(UpdateKcp);
+                    kcpUpdateThread.IsBackground = true;
+                    kcpUpdateThread.Start();
+                }
             }
-            kcpUpdateThread = new Thread(UpdateKcp);
-            kcpUpdateThread.IsBackground = true;
-            kcpUpdateThread.Start();
-
+            Log.Error("usingConv=sss" + usingConv);
             // Set the flag for socket connected.  
-            connected = (e.SocketError == SocketError.Success);
+            connected = true;
             //如果连接成功,则初始化socketAsyncEventArgs  
-            if (connected)
+            if (connected && (usingConv == 1))
             {
+                Log.Error("usingConv=bbbbbbbbbbbb" + usingConv);
                 initArgs(e);
                 string str = "connect_req";
                 Send(Encoding.ASCII.GetBytes(str.ToCharArray()));
             }
+            else if (connected)
+            {
+                initArgs(e);
+            }
 
+        }
+
+
+        // Calback for connect operation  
+        private void OnConnect(object sender, SocketAsyncEventArgs e)
+        {
+            // Signals the end of connection.  
+            //autoConnectEvent.Set(); //释放阻塞.  
+            Log.Error("usingConv=sss" + usingConv);
+            if (usingConv <= 0)
+            {
+                lock (kcpManager)
+                {
+                    if (!kcpManager.ContainsKey(1))
+                    {
+                        kcpManager.Add(1, new KCP(1, SendData));
+                    }
+                    usingConv = 1;
+                }
+                if (null == kcpUpdateThread)
+                {
+                    kcpUpdateThread = new Thread(UpdateKcp);
+                    kcpUpdateThread.IsBackground = true;
+                    kcpUpdateThread.Start();
+                }
+            }
+            Log.Error("usingConv=sss" + usingConv);
+            // Set the flag for socket connected.  
+            connected = (e.SocketError == SocketError.Success);
+            //如果连接成功,则初始化socketAsyncEventArgs  
+            if (connected && (usingConv == 1))
+            {
+                Log.Error("usingConv=bbbbbbbbbbbb" + usingConv);
+                initArgs(e);
+                string str = "connect_req";
+                Send(Encoding.ASCII.GetBytes(str.ToCharArray()));
+            }
+            else if(connected)
+            {
+                initArgs(e);
+            }
+            
         }
 
         protected long GetCurrent()
         {
             TimeSpan ts = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0);
-            return Convert.ToInt64(ts.Milliseconds);
+            return Convert.ToInt64(ts.TotalMilliseconds);
         }
 
         // kcp线程更新频率
@@ -212,26 +383,34 @@ namespace JUFrame
         {
             while (connected)
             {
+
+
                 long start = GetCurrent();
                 lock (kcpManager)
                 {
-                    foreach (KeyValuePair<uint, KCP> kv in kcpManager)
+
+                    List<uint> pp = new List<uint>(kcpManager.Keys);
+
+                    for(var index = 0; index < pp.Count; index ++)
+                    //foreach (KeyValuePair<uint, KCP> kv in kcpManager)
                     {
+                        KeyValuePair<uint, KCP> kv = new KeyValuePair<uint, KCP>(pp[index], kcpManager[pp[index]]);
                         kv.Value.Update((uint)start);
 
                         int len = kv.Value.Recv(kcpDataCache);
 
                         if (len > 0)
                         {
-
                             byte[] data = new byte[len];
                             Array.Copy(kcpDataCache, data, len);
-                            m_buffer.AddRange(data);
+                            lock (m_buffer)
+                            {
+                                m_buffer.AddRange(data);
+                            }
 
                             //DoReceiveEvent()
                             do
                             {
-
                                 int headLength = Marshal.SizeOf(typeof(CommonPackHead));
                                 // 判断包头是否满足
                                 if (headLength <= m_buffer.Count)
@@ -246,14 +425,14 @@ namespace JUFrame
                                     //释放内存空间
                                     Marshal.FreeHGlobal(structPtr);
 
-                                    if (packHead.msg_len <= m_buffer.Count - headLength)
+                                    if (packHead.msg_len <= m_buffer.Count)
                                     {
                                         //包够长时,则提取出来,交给后面的程序去处理  
-                                        byte[] recv = m_buffer.GetRange(0, headLength + (int)packHead.msg_len).ToArray();
+                                        byte[] recv = m_buffer.GetRange(0, (int)packHead.msg_len).ToArray();
 
                                         lock (m_buffer)
                                         {
-                                            m_buffer.RemoveRange(0, headLength + (int)packHead.msg_len);
+                                            m_buffer.RemoveRange(0, (int)packHead.msg_len);
                                         }
                                         //将数据包交给前台去处理  
                                         DoReceiveEvent(packHead, recv);
@@ -275,7 +454,6 @@ namespace JUFrame
                                         if(!kcpManager.ContainsKey(new_conv))
                                         {
                                             kcpManager.Add(new_conv, new KCP(new_conv, SendData));
-                                            Log.Error("new_conv=" + new_conv);
                                             lock (m_buffer)
                                             {
                                                 m_buffer.RemoveRange(0, 4);
@@ -283,13 +461,12 @@ namespace JUFrame
                                         }
 
                                         usingConv = new_conv;
-
+                                        Log.Error("usingConv=" + new_conv);
                                     }
 
                                     //长度不够,还得继续接收,需要跳出循环  
                                     break;
                                 }
-
                             } while (m_buffer.Count > 4);
                         }
 
@@ -315,19 +492,12 @@ namespace JUFrame
         /// <param name="e"></param>  
         private void initArgs(SocketAsyncEventArgs e)
         {
-            m_bufferManager.InitBuffer(); 
             //发送参数  
-            initSendArgs(); 
-            //接收参数  
-            receiveEventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(IO_Completed); 
-            receiveEventArgs.UserToken = e.UserToken; 
-            receiveEventArgs.ArgsTag = 0; 
-            m_bufferManager.SetBuffer(receiveEventArgs); 
+            initSendArgs();
 
-            //启动接收,不管有没有,一定得启动.否则有数据来了也不知道.  
-            if (!e.AcceptSocket.ReceiveAsync(receiveEventArgs))
-                ProcessReceive(receiveEventArgs);
-
+            MySocketEventArgs readArgs = this.receiveEventArgsPool.Rent<MySocketEventArgs>();
+            this.clientSocket.ReceiveFromAsync(readArgs); 
+             
         }
 
         /// <summary>  
@@ -340,6 +510,7 @@ namespace JUFrame
             sendArg.Completed += new EventHandler<SocketAsyncEventArgs>(IO_Completed);
             sendArg.UserToken = clientSocket;
             sendArg.RemoteEndPoint = hostEndPoint;
+            sendArg.DisconnectReuseSocket = true;
             sendArg.IsUsing = false;
             Interlocked.Increment(ref tagCount);
             sendArg.ArgsTag = tagCount;
@@ -355,19 +526,22 @@ namespace JUFrame
         void IO_Completed(object sender, SocketAsyncEventArgs e)
         {
             MySocketEventArgs mys = (MySocketEventArgs)e;
+            Log.Error("111111111=" + e.LastOperation);
             // determine which type of operation just completed and call the associated handler  
             switch (e.LastOperation)
             {
-                case SocketAsyncOperation.Receive:
+                case SocketAsyncOperation.ReceiveFrom:
                     ProcessReceive(e);
                     break;
-                case SocketAsyncOperation.Send:
+                case SocketAsyncOperation.SendTo:
                     mys.IsUsing = false; //数据发送已完成.状态设为False  
                     ProcessSend(e);
                     break;
                 default:
                     throw new ArgumentException("The last operation completed on the socket was not a receive or send");
             }
+
+            
         }
 
         // This method is invoked when an asynchronous receive operation completes.   
@@ -378,16 +552,19 @@ namespace JUFrame
         {
             try
             {
-                // check if the remote host closed the connection  
-                Socket token = (Socket)e.UserToken;
-                Log.Error("esdf=" + e.BytesTransferred + "," + e.SocketError);
+                
+                Log.Error("EEE=" + e.BytesTransferred + "," + e.SocketError + "," + e.Count);
+
                 if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
                 {
+                    MySocketEventArgs eventArgs = this.receiveEventArgsPool.Rent<MySocketEventArgs>();
+                    this.clientSocket.ReceiveFromAsync(eventArgs);
+
                     //读取数据  
                     byte[] data = new byte[e.BytesTransferred];
                     Array.Copy(e.Buffer, e.Offset, data, 0, e.BytesTransferred);
 
-                    if (!(e.BytesTransferred < KCP.IKCP_OVERHEAD))
+                    if (!(data.Length < KCP.IKCP_OVERHEAD))
                     {
                         lock (kcpManager)
                         {
@@ -401,9 +578,12 @@ namespace JUFrame
 
                         }
                     }
-                   
-                    if (!token.ReceiveAsync(e))
+
+                    this.receiveEventArgsPool.Return((MySocketEventArgs)e);
+                    /*
+                    if (!token.ReceiveFromAsync(e))
                         this.ProcessReceive(e);
+                    */
                 }
                 else
                 {
@@ -439,6 +619,7 @@ namespace JUFrame
         {
              
             Socket s = (Socket)e.UserToken;
+            /*
             if (s.Connected)
             {
                 // close the socket associated with the client  
@@ -459,23 +640,29 @@ namespace JUFrame
                     connected = false;
                 }
             }
+            */
+            connected = false;
             //这里一定要记得把事件移走,如果不移走,当断开服务器后再次连接上,会造成多次事件触发.  
             foreach (MySocketEventArgs arg in listArgs)
                 arg.Completed -= IO_Completed;
-            receiveEventArgs.Completed -= IO_Completed;
+
+            listArgs.Clear();
+
+            //receiveEventArgs.Completed -= IO_Completed;
 
             if (ServerStopEvent != null)
                 ServerStopEvent();
         }
 
         // Exchange a message with the host.  
-        internal int Send(byte[] sendBuffer)
+        internal virtual int Send(byte[] sendBuffer)
         {
             if (connected)
             {
                 lock (kcpManager)
                 {
-                    return kcpManager[usingConv].Send(sendBuffer);
+                    int ret = kcpManager[usingConv].Send(sendBuffer);
+                    return ret;
                 }
                     
             }
@@ -510,7 +697,12 @@ namespace JUFrame
         // Disposes the instance of SocketClient.  
         public void Dispose()
         {
-            autoConnectEvent.Close();
+            if(null != kcpUpdateThread)
+            {
+                kcpUpdateThread.Abort();
+                kcpUpdateThread = null;
+            }
+            //autoConnectEvent.Close();
             if (clientSocket.Connected)
             {
                 clientSocket.Close();
